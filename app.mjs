@@ -88,7 +88,7 @@ app.get("/user/:id", validateIdParam, async (req, res, next) => {
     next(err);
   }
 });
-app.post("/users", async (req, res, next) => {
+app.post("/user", async (req, res, next) => {
     try {
       // Create a new user instance
       const newUser = new User(req.body);
@@ -351,8 +351,8 @@ app.post("/initialize-transaction", async (req, res) => {
 
     // Save payment details to MongoDB
     const paymentData = {
-      email,
-      amount,
+      email:string,
+      amount:number,
       ...paystackResponse.data,
     };
 
