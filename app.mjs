@@ -53,11 +53,12 @@ const GoogleUser = mongoose.model('GoogleUser', googleUserSchema);
 
 
 // centralized error handling middleware
+app.use(cors())
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Something broke!");
 });
-app.use(cors())
+
 // Function to check if the provided ID is a valid MongoDB ObjectId
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
@@ -88,7 +89,7 @@ app.get("/user/:id", validateIdParam, async (req, res, next) => {
     next(err);
   }
 });
-app.post("/user", async (req, res, next) => {
+app.post("/users", async (req, res, next) => {
     try {
       // Create a new user instance
       const newUser = new User(req.body);
@@ -351,8 +352,8 @@ app.post("/initialize-transaction", async (req, res) => {
 
     // Save payment details to MongoDB
     const paymentData = {
-      email:string,
-      amount:number,
+      email,
+      amount,
       ...paystackResponse.data,
     };
 
