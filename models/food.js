@@ -34,6 +34,11 @@ const foodSchema = new mongoose.Schema({
   },
 });
 
+
+// Create a compound text index on the 'name', 'description', and 'category' fields
+foodSchema.index({ name: 'text', description: 'text', category: 'text' });
+
+
 const Food = mongoose.model("Food", foodSchema);
 
 module.exports = Food;

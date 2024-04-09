@@ -497,7 +497,7 @@ app.get("/search/food", async (req, res) => {
     const { query } = req.query;
     
     // Perform a search for food items based on the query parameter
-    const foods = await Food.find({ name: { $regex: new RegExp(query, "i") } });
+    const foods = await Food.find({ $text: { $search: query } });
 
     res.status(200).json(foods);
   } catch (error) {
