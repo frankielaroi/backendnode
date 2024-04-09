@@ -491,7 +491,35 @@ app.post('/login', async (req, res, next) => {
       next(error);
     }
   });
-  
+//route to search foods
+app.get("/search/food", async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    // Perform a search for food items based on the query parameter
+    const foods = await Food.find({ $text: { $search: query } });
+
+    res.status(200).json(foods);
+  } catch (error) {
+    console.error("Error searching for food:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Route to search for shops
+app.get("/search/shops", async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    // Perform a search for shops based on the query parameter
+    const shops = await Shop.find({ $text: { $search: query } });
+
+    res.status(200).json(shops);
+  } catch (error) {
+    console.error("Error searching for shops:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});  
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
