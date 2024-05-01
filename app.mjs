@@ -5,8 +5,6 @@ import cors from 'cors';
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import crypto from "crypto";
 import User from './models/user.js';
 import Payment from "./models/payments.js";
 import Order from "./models/order.js"; // Adjust the path based on your file structure
