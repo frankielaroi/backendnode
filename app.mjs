@@ -10,21 +10,25 @@ import Payment from "./models/payments.js";
 import Order from "./models/order.js"; // Adjust the path based on your file structure
 import Food from "./models/food.js";
 import Shop from "./models/shop.js";
-
-
-// connect to MongoDB
-mongoose.connect(
-  "mongodb+srv://jdanq21:laroi11@cluster0.0t010eo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-);
+import dotenv from "dotenv";
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
+const mongodbUri = process.env.MONGODB_URI;
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
+const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
+// connect to MongoDB
+mongoose.connect(mongodbUri);
+
+
 
 
 const client = new OAuth2Client({
-  clientId: '1077290995207-nsp8ootlc2cvkn2v32qfu2vgvk6r25ct.apps.googleusercontent.com',
-  clientSecret: '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',
-  redirectUri: 'http://localhost:3000/auth/google/callback'
+  clientId: googleClientId,
+  clientSecret: googleClientSecret,
+  redirectUri:googleRedirectUri
 });
 
 // parse application/x-www-form-urlencoded
@@ -320,7 +324,7 @@ app.post("/initialize-transaction", async (req, res) => {
     path: "/transaction/initialize",
     method: "POST",
     headers: {
-      Authorization: "Bearer sk_test_969507c3375ac0562ae65bc47190c199689d550c",
+      Authorization: `Bearer ${paystackSecretKey}`,
       "Content-Type": "application/json",
     },
   };
@@ -378,7 +382,7 @@ app.get("/verify-transaction/:reference", async (req, res) => {
       path: `/transaction/verify/${reference}`,
       method: "GET",
       headers: {
-        Authorization: "Bearer sk_test_969507c3375ac0562ae65bc47190c199689d550c",
+        Authorization: `Bearer ${paystackSecretKey}`,
       },
     };
   
