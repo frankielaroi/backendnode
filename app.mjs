@@ -12,8 +12,9 @@ import Food from "./models/food.js";
 import Shop from "./models/shop.js";
 import dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
-const port = process.env.PORT || 3001;
+const port = 3001;
 const mongodbUri = process.env.MONGODB_URI;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -21,7 +22,6 @@ const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI;
 const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
 // connect to MongoDB
 mongoose.connect(mongodbUri);
-
 
 
 
