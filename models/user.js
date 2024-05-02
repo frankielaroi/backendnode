@@ -33,7 +33,13 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true
-  }
+  },
+  resetPasswordToken: {
+    type: String,
+  },
+  resetPasswordExpires: {
+    type: Date,
+  },
 });
 
 // Hash the password before saving

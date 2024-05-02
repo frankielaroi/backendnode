@@ -1,9 +1,11 @@
 import https from 'https';
 import axios from 'axios';
+import bcrypt from 'bcrypt'
 import { OAuth2Client } from 'google-auth-library';
 import cors from 'cors';
 import express from "express";
 import bodyParser from "body-parser";
+import crypto from "crypto";
 import mongoose from "mongoose";
 import User from './models/user.js';
 import Payment from "./models/payments.js";
@@ -11,6 +13,8 @@ import Order from "./models/order.js"; // Adjust the path based on your file str
 import Food from "./models/food.js";
 import Shop from "./models/shop.js";
 import dotenv from "dotenv";
+import nodemailer from 'nodemailer';
+
 
 dotenv.config();
 const app = express();
@@ -521,6 +525,86 @@ app.get("/search/shops", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });  
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate reset token and expiry
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+    console.log(resetToken)
+    // Save user with reset token
+    await user.save();
+
+    // Load environment variables
+    const mailSender = process.env.MAIL_SENDER;
+    const mailPassword = process.env.MAIL_PASSWORD;
+
+    // Create reusable transporter object using the default SMTP transport
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: mailSender,
+        pass: mailPassword,
+      },
+    });
+
+    // Send email with reset link
+    const mailOptions = {
+      from: mailSender,
+      to: email,
+      subject: "Password Reset Request",
+      text:
+        `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+        `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+        `http://${req.headers.host}/reset/${resetToken}\n\n` +
+        `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error("Error in forgot password:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Route to handle password reset form submission
+app.post("/reset/:resetToken", async (req, res) => {
+  const resetToken = req.params.resetToken;
+  const { newPassword } = req.body;
+
+  try {
+    // Find user by reset resetToken and check expiry
+    const user = await User.findOne({
+      resetPasswordToken: resetToken,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+    console.log(resetToken)
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    // Update user's password and clear reset token fields
+    user.password = await bcrypt.hash(newPassword, 10); // Hash the new password
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Error in password reset:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
