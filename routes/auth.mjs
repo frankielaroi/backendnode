@@ -1,11 +1,7 @@
 import express from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import axios from 'axios';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 import dotenv from "dotenv";
-import User from '../models/user.js';
 import GoogleUser from '../models/googleuser.js'; // Assuming you have a separate model for Google users
 
 dotenv.config();
