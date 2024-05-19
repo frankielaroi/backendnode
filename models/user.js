@@ -1,38 +1,37 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
-
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
   firstName: {
     type: String,
-    required: true
+    required: true,
   },
   lastName: {
     type: String,
-    required: true
+    required: true,
   },
-  role:{
+  role: {
     type: String,
-    enum: ['user','seller', 'admin'], // a user can be buyer, seller or admin
-    default:'user'
+    enum: ["user", "seller", "admin"], // a user can be buyer, seller or admin
+    default: "user",
   },
   email: {
     type: String,
     required: true,
     unique: true,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return /^\S+@\S+$/.test(v);
       },
-      message: props => `${props.value} is not a valid email!`
-    }
+      message: (props) => `${props.value} is not a valid email!`,
+    },
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   resetPasswordToken: {
     type: String,
@@ -43,12 +42,12 @@ const userSchema = new Schema({
 });
 
 // Hash the password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre("save", async function (next) {
   try {
-    if (!this.isModified('password')) {
+    if (!this.isModified("password")) {
       return next();
     }
-    const hashedPassword = await bcrypt.hash(this.password, 10);
+    const hashedPassword = await crypto.hash(this.password, 10);
     this.password = hashedPassword;
     next();
   } catch (error) {
@@ -57,20 +56,20 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    return await crypto.compare(candidatePassword, this.password);
   } catch (error) {
     return false;
   }
 };
 
 // Method to generate JWT token
-userSchema.methods.generateAuthToken = function() {
-  const token = jwt.sign({ _id: this._id }, 'your_secret_key');
+userSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign({ _id: this._id }, "your_secret_key");
   return token;
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
