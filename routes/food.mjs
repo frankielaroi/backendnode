@@ -1,3 +1,5 @@
+// routes/food.js
+
 import express from 'express';
 import Food from '../models/food.js';
 
@@ -6,6 +8,20 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const foods = await Food.find();
+    res.status(200).json(foods);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get("/category/:category", async (req, res) => {
+  const category = req.params.category;
+
+  try {
+    const foods = await Food.find({ category });
+    if (foods.length === 0) {
+      return res.status(404).json({ message: 'No food items found for this category' });
+    }
     res.status(200).json(foods);
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
