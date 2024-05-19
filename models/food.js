@@ -11,7 +11,6 @@ const foodSchema = new mongoose.Schema({
     type: String,
   },
   price: {
-    
     type: Number,
     required: true,
     min: 0,
@@ -19,13 +18,14 @@ const foodSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
+    enum: ["breakfast", "lunch", "dinner", "dessert", "others"],
   },
   imageUrl: {
     type: String,
   },
   shop: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Shop", 
+    ref: "Shop",
     required: true,
   },
   createdAt: {
@@ -34,10 +34,8 @@ const foodSchema = new mongoose.Schema({
   },
 });
 
-
 // Create a compound text index on the 'name', 'description', and 'category' fields
-foodSchema.index({ name: 'text', description: 'text', category: 'text' });
-
+foodSchema.index({ name: "text", description: "text", category: "text" });
 
 const Food = mongoose.model("Food", foodSchema);
 
