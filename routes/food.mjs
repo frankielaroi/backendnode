@@ -1,11 +1,16 @@
+// routes/food.js
+
 import express from 'express';
 import Food from '../models/food.js';
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  const { category } = req.query;
+  const filter = category ? { category } : {};
+
   try {
-    const foods = await Food.find();
+    const foods = await Food.find(filter);
     res.status(200).json(foods);
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
