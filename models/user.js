@@ -1,7 +1,6 @@
-import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken")
+const crypto = require("crypto")
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -47,4 +46,4 @@ userSchema.methods.generateAuthToken = function () {
 };
 
 const User = mongoose.model("User", userSchema);
-export default User;
+module.exports = User;
