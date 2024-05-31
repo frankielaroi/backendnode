@@ -1,10 +1,8 @@
-const mongoose = require("mongoose");
-const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-const { Schema } = mongoose;
-
-const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: true,
@@ -15,7 +13,7 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ["user", "seller", "admin"], // a user can be buyer, seller or admin
+    enum: ["user", "seller", "admin"],
     default: "user",
   },
   email: {
@@ -33,43 +31,19 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  resetPasswordToken: {
-    type: String,
-  },
-  resetPasswordExpires: {
-    type: Date,
-  },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
 });
 
-// Hash the password before saving
-userSchema.pre("save", async function (next) {
-  try {
-    if (!this.isModified("password")) {
-      return next();
-    }
-    const hashedPassword = await crypto.hash(this.password, 10);
-    this.password = hashedPassword;
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Method to compare passwords
+// Password comparison method
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  try {
-    return await crypto.compare(candidatePassword, this.password);
-  } catch (error) {
-    return false;
-  }
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Method to generate JWT token
+// Token generation method
 userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ _id: this._id }, "your_secret_key");
-  return token;
+  return jwt.sign({ _id: this._id, role: this.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
 const User = mongoose.model("User", userSchema);
-
-module.exports = User;
+export default User;
