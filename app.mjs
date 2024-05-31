@@ -13,7 +13,7 @@ import UserRoutes from "./routes/user.mjs";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT;
+const port = 7000;
 
 app.use(bodyParser.json());
 

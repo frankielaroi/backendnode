@@ -34,10 +34,15 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: Date,
 });
 
-// Password comparison method
+// Method to hash the password
+userSchema.methods.hashPassword = function (password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+};
+
+// Method to compare passwords
 userSchema.methods.comparePassword = function (candidatePassword) {
-  const hash = crypto.createHash('sha256').update(candidatePassword).digest('hex');
-  return this.password === hash;
+  const hashedPassword = crypto.createHash('sha256').update(candidatePassword).digest('hex');
+  return hashedPassword === this.password;
 };
 
 // Token generation method
