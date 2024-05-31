@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -36,8 +36,9 @@ const userSchema = new mongoose.Schema({
 });
 
 // Password comparison method
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+userSchema.methods.comparePassword = function (candidatePassword) {
+  const hash = crypto.createHash('sha256').update(candidatePassword).digest('hex');
+  return this.password === hash;
 };
 
 // Token generation method
