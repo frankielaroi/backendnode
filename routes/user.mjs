@@ -1,9 +1,8 @@
 import express from "express";
 import crypto from "crypto";
-import bcrypt from "bcrypt";
+import User from "../models/user.js";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import User from "../models/user.js";
 import mongoose from "mongoose";
 
 dotenv.config();
@@ -45,11 +44,10 @@ router.post("/users", async (req, res, next) => {
     const { firstName, lastName, email, password, role } = req.body;
 
     // Create a new user instance
-    const newUser = new User({ firstName, lastName, email, password, role });
+    const newUser = new User({ firstName, lastName, email, role });
 
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    newUser.password = await bcrypt.hash(newUser.password, salt);
+    // Hash the password and set it on the user object
+    newUser.password = newUser.hashPassword(password);
 
     // Save the user to the database
     await newUser.save();
@@ -93,13 +91,7 @@ router.post('/login', async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordMatch) {
+    if (!user || !user.comparePassword(password)) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
@@ -167,8 +159,7 @@ router.post("/reset/:resetToken", async (req, res, next) => {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    user.password = user.hashPassword(newPassword);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
